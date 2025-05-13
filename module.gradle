@@ -1,7 +1,7 @@
 ext {
     // Magisk Module
-    magiskModuleId = "zygiskfrida"
-    moduleName = "ZygiskFrida"
+    magiskModuleId = "zygiskgadget"
+    moduleName = "zygisk-frida-gadget"
     moduleAuthor = "lico-n"
     moduleDescription = "Injects frida gadget via zygisk."
     moduleVersion = "v1.7.2"
@@ -13,5 +13,5 @@ ext {
     moduleMaxRiruApiVersion = 26
 
     // Frida
-    fridaVersion = "16.2.1"
+    fridaVersion = "16.7.14"
 }

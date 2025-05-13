@@ -18,28 +18,35 @@
 #include "xdl.h"
 #include "remapper.h"
 
-static std::string get_process_name() {
-    auto path = "/proc/self/cmdline";
-
-    std::ifstream file(path);
-    std::stringstream buffer;
-
-    buffer << file.rdbuf();
-    return buffer.str();
+static bool is_target_uid(uid_t target_uid) {
+    return getuid() == target_uid;
 }
 
-static void wait_for_init(std::string const &app_name) {
+static uid_t get_app_uid(const std::string &app_name) {
+    std::ifstream status_file("/proc/self/status");
+    std::string line;
+    while (std::getline(status_file, line)) {
+        if (line.rfind("Uid:", 0) == 0) {
+            std::istringstream iss(line.substr(4));
+            uid_t uid;
+            iss >> uid;
+            return uid;
+        }
+    }
+    return (uid_t)-1;
+}
+static void wait_for_init(const std::string &app_name, uid_t target_uid) {
     LOGI("Wait for process to complete init");
 
-    // wait until the process is renamed to the package name
-    while (get_process_name().find(app_name) == std::string::npos) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    while (getuid() != target_uid) {
+        LOGI("Still in zygote phase, current UID: %d, waiting for target UID: %d", getuid(), target_uid);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
+    // 安全緩衝
     // additional tolerance for the init to complete after process rename
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-    LOGI("Process init completed");
+    LOGI("Process init completed for app: %s (UID matched: %d)", app_name.c_str(), target_uid);
 }
 
 static void delay_start_up(uint64_t start_up_delay_ms) {
@@ -93,7 +100,7 @@ static void inject_libs(target_config const &cfg) {
     // Loading the gadget before that will freeze the process
     // before the init has completed. This make the process
     // undiscoverable or otherwise cause issue attaching.
-    wait_for_init(cfg.app_name);
+    wait_for_init(cfg.app_name,getuid());
 
     if (cfg.child_gating.enabled) {
         enable_child_gating(cfg.child_gating);
@@ -116,6 +123,11 @@ bool check_and_inject(std::string const &app_name) {
     }
 
     LOGI("App detected: %s", app_name.c_str());
+    LOGD("Config app_name: %s", cfg->app_name.c_str())
+
+    uid_t app_uid  = get_app_uid(cfg->app_name);
+    LOGI("App UID detected: %d", app_uid);
+
     LOGI("PID: %d", getpid());
 
 
@@ -125,7 +137,12 @@ bool check_and_inject(std::string const &app_name) {
         return false;
     }
 
-    std::thread inject_thread(inject_libs, target_config);
+//    std::thread inject_thread(inject_libs, target_config);
+//    inject_thread.detach();
+    std::thread inject_thread([target_config, app_uid]() {
+        wait_for_init(target_config.app_name, app_uid);
+        inject_libs(target_config);
+    });
     inject_thread.detach();
 
     return true;

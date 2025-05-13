@@ -81,21 +81,21 @@ fi
 ui_print "- Extracting bundled frida gadget"
 
 mkdir -p "$TMP_MODULE_DIR"
-extract "$ZIPFILE" "gadget/libgadget-$ARCH.so.xz" "$TMP_MODULE_DIR" true
-mv "$TMP_MODULE_DIR/libgadget-$ARCH.so.xz" "$TMP_MODULE_DIR/libgadget.so.xz"
+extract "$ZIPFILE" "gadget/libgadget-$ARCH.so.gz" "$TMP_MODULE_DIR" true
+mv "$TMP_MODULE_DIR/libgadget-$ARCH.so.gz" "$TMP_MODULE_DIR/libgadget.so.gz"
 rm "$TMP_MODULE_DIR/libgadget.so"
-$BUSYBOX_BIN unxz "$TMP_MODULE_DIR/libgadget.so.xz"
-rm "$TMP_MODULE_DIR/libgadget.so.xz"
+$BUSYBOX_BIN gunzip "$TMP_MODULE_DIR/libgadget.so.gz"
+rm "$TMP_MODULE_DIR/libgadget.so.gz"
 
 if [ "$IS64BIT" = true ]; then
   ARCH32="arm"
   [ "$ARCH" = "x64" ] && ARCH32="x86"
 
-  extract "$ZIPFILE" "gadget/libgadget-$ARCH32.so.xz" "$TMP_MODULE_DIR" true
-  mv "$TMP_MODULE_DIR/libgadget-$ARCH32.so.xz" "$TMP_MODULE_DIR/libgadget32.so.xz"
+  extract "$ZIPFILE" "gadget/libgadget-$ARCH32.so.gz" "$TMP_MODULE_DIR" true
+  mv "$TMP_MODULE_DIR/libgadget-$ARCH32.so.gz" "$TMP_MODULE_DIR/libgadget32.so.gz"
   rm "$TMP_MODULE_DIR/libgadget32.so"
-  $BUSYBOX_BIN unxz "$TMP_MODULE_DIR/libgadget32.so.xz"
-  rm "$TMP_MODULE_DIR/libgadget32.so.xz"
+  $BUSYBOX_BIN gunzip "$TMP_MODULE_DIR/libgadget32.so.gz"
+  rm "$TMP_MODULE_DIR/libgadget32.so.gz"
 fi
 
 extract "$ZIPFILE" "config.json.example" "$TMP_MODULE_DIR" true

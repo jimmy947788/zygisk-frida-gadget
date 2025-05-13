@@ -1,4 +1,4 @@
-# ZygiskFrida
+# zygisk-frida-gadget
 
 > [Frida](https://frida.re) is a dynamic instrumentation toolkit for developers, reverse-engineers, and security researchers
 
@@ -7,7 +7,7 @@
 
 ## Introduction
 
-[ZygiskFrida](README.md) is a zygisk module allowing you to inject frida gadget in Android applications in a
+[zygisk-frida-gadget](README.md) is a zygisk module allowing you to inject frida gadget in Android applications in a
 more stealthy way.
 
 - The gadget is not embedded into the APK itself. So APK Integrity/Signature checks will still pass.
@@ -25,17 +25,24 @@ using riru with an older magisk version rather than zygisk.
 - Zygisk available and enabled
 
 ### Quick start
-- Download the latest release from the [Release Page](https://github.com/lico-n/ZygiskFrida/releases)\
+- Download the latest release from the [Release Page](https://github.com/lico-n/zygisk-frida-gadget/releases)\
   If you are using riru instead of zygisk choose the riru-release. Otherwise choose the normal version.
-- Transfer the ZygiskFrida zip file to your device and install it via Magisk.
+- Transfer the zygisk-frida-gadget zip file to your device and install it via Magisk.
 - Reboot after install
 - Create the config file and adjust the package name to your target app (replace `your.target.application` in the commands)
 ```shell
 adb shell 'su -c cp /data/local/tmp/re.zyg.fri/config.json.example /data/local/tmp/re.zyg.fri/config.json'
 adb shell 'su -c sed -i s/com.example.package/your.target.application/ /data/local/tmp/re.zyg.fri/config.json'
 ```
+
+adb shell 'uu -c cp /data/local/tmp/re.zyg.fri/config.json.example /data/local/tmp/re.zyg.fri/config.json'
+adb shell 'uu -c sed -i s/com.example.package/com.kasikornbank.kbiz/ /data/local/tmp/re.zyg.fri/config.json'
+
 - Launch your app. It will pause at startup allowing you to attach
   f.e. `frida -U -N your.target.application` or `frida -U -n Gadget`
+
+    frida -U -N com.kasikornbank.kbiz
+    frida -U -n Gadget
 
 This assumes that you don't have any other frida server running (f.e. by using MagiskFrida).
 You can still run it together with frida-server but you would have to configure the gadget

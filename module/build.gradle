@@ -22,12 +22,13 @@ task downloadFrida(type: Download) {
     def downloadArchs = ["arm", "arm64", "x86_64", "x86"]
     def magiskArchs = ["arm", "arm64", "x64", "x86"]
 
-    def sources = downloadArchs.collect{
-        arch -> "https://github.com/frida/frida/releases/download/${fridaVersion}/frida-gadget-${fridaVersion}-android-${arch}.so.xz".toString()
+    def sources = downloadArchs.collect{ arch ->
+        //"https://github.com/frida/frida/releases/download/${fridaVersion}/frida-gadget-${fridaVersion}-android-${arch}.so.xz".toString()
+        "https://file.daedalus.cc/api/public/dl/OxRpfMN8/downloads/ajeossida-frida/ajeossida-${fridaVersion}/ajeossida-server-${fridaVersion}-android-${arch}.so.gz".toString()
     }
 
     def outputs = magiskArchs.collect{
-        arch ->  "libgadget-${arch}.so.xz".toString()
+        arch ->  "libgadget-${arch}.so.gz".toString()
     }
 
     def downloads = [sources, outputs].transpose().collectEntries()
@@ -152,7 +153,7 @@ afterEvaluate {
                 from(templatePath) {
                     include("riru.sh")
                     def tokens = [
-                            "RIRU_MODULE_LIB_NAME"              : "zygiskfrida",
+                            "RIRU_MODULE_LIB_NAME"              : "zygisk-frida-gadget",
                             "RIRU_MODULE_API_VERSION"           : moduleMaxRiruApiVersion.toString(),
                             "RIRU_MODULE_MIN_API_VERSION"       : moduleMinRiruApiVersion.toString(),
                             "RIRU_MODULE_MIN_RIRU_VERSION_NAME" : moduleMinRiruVersionName,
@@ -164,7 +165,7 @@ afterEvaluate {
             doLast {
                 fileTree("$magiskDir/lib").visit { f ->
                     if (!f.directory) return
-                    def srcPath = Paths.get("${f.file.absolutePath}/libzygiskfrida.so")
+                    def srcPath = Paths.get("${f.file.absolutePath}/libzygiskgadget.so")
                     def dstPath = Paths.get("$magiskDir/lib/${f.path}.so")
                     Files.move(srcPath, dstPath)
                     new File("$magiskDir/lib/${f.path}").deleteDir()
